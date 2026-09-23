@@ -77,8 +77,8 @@ export const ProfileSettingsView: React.FC = () => {
             <div>
               <p className="text-sm font-bold text-slate-900 dark:text-white">{user?.name}</p>
               <p className="text-xs text-slate-500">{user?.email}</p>
-              <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                {user?.role} PRIVILEGES
+              <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                ACTIVE {user?.streak ?? 28}-DAY STREAK
               </span>
             </div>
           </div>

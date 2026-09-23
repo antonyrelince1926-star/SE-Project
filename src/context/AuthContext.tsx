@@ -31,7 +31,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('dopamineflow_theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+    }
+    return 'dark';
+  });
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // Apply dark class to html document element
@@ -39,8 +45,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const root = document.documentElement;
     if (theme === 'dark') {
       root.classList.add('dark');
+      root.classList.remove('light');
     } else {
       root.classList.remove('dark');
+      root.classList.add('light');
+    }
+    try {
+      localStorage.setItem('dopamineflow_theme', theme);
+    } catch (e) {
+      // storage unavailable
     }
   }, [theme]);
 

@@ -13,7 +13,6 @@ import { ReportsView } from './components/reports/ReportsView';
 import { NeuroscienceTipsView } from './components/tips/NeuroscienceTipsView';
 import { AchievementsView } from './components/achievements/AchievementsView';
 import { ProfileSettingsView } from './components/profile/ProfileSettingsView';
-import { AdminDashboardView } from './components/admin/AdminDashboardView';
 import { LandingView } from './components/landing/LandingView';
 import { SignedOutView } from './components/auth/SignedOutView';
 import { DailyTrackerModal } from './components/tracker/DailyTrackerModal';
@@ -342,9 +341,6 @@ const AppContent: React.FC = () => {
 
               {/* VIEW: PROFILE */}
               {currentView === 'profile' && <ProfileSettingsView />}
-
-              {/* VIEW: ADMIN */}
-              {currentView === 'admin' && <AdminDashboardView />}
             </>
           )}
         </main>

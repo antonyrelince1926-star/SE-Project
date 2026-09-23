@@ -568,6 +568,79 @@ const localStore = {
     const updated = [newLog, ...logs.slice(0, 49)];
     localStorage.setItem(STORAGE_AUDIT_KEY, JSON.stringify(updated));
   },
+  getAdminUsers(): any[] {
+    if (typeof window === 'undefined') return DEFAULT_USERS;
+    const raw = localStorage.getItem('dopamineflow_admin_users');
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch {}
+    }
+    const initial = DEFAULT_USERS.map((u) => ({
+      ...u,
+      status: u.isActive ? 'ACTIVE' : 'SUSPENDED',
+      entriesCount: u.id === 'usr_alex' ? 28 : 14,
+      createdAt: u.createdAt
+        ? new Date(u.createdAt).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : 'Aug 15, 2026',
+    }));
+    localStorage.setItem('dopamineflow_admin_users', JSON.stringify(initial));
+    return initial;
+  },
+  updateUserStatus(id: string, status: 'ACTIVE' | 'SUSPENDED'): any {
+    const users = this.getAdminUsers();
+    const userIndex = users.findIndex((u) => u.id === id);
+    if (userIndex === -1) throw new Error('User not found');
+    users[userIndex] = {
+      ...users[userIndex],
+      status,
+      isActive: status === 'ACTIVE',
+    };
+    localStorage.setItem('dopamineflow_admin_users', JSON.stringify(users));
+    this.addAuditLog(
+      status === 'ACTIVE' ? 'USER_ACTIVATED' : 'USER_SUSPENDED',
+      `Admin updated account operational status of ${users[userIndex].email} to ${status}`,
+      'Dr. Elena Vance (Lead Admin)',
+      'admin@dopamineflow.io'
+    );
+    return users[userIndex];
+  },
+  updateUserRole(id: string, role: 'ADMIN' | 'USER'): any {
+    const users = this.getAdminUsers();
+    const userIndex = users.findIndex((u) => u.id === id);
+    if (userIndex === -1) throw new Error('User not found');
+    users[userIndex] = {
+      ...users[userIndex],
+      role,
+    };
+    localStorage.setItem('dopamineflow_admin_users', JSON.stringify(users));
+    this.addAuditLog(
+      role === 'ADMIN' ? 'USER_PROMOTED_ADMIN' : 'USER_DEMOTED_MEMBER',
+      `Admin modified permission tier of ${users[userIndex].email} to ${role}`,
+      'Dr. Elena Vance (Lead Admin)',
+      'admin@dopamineflow.io'
+    );
+    return users[userIndex];
+  },
+  deleteUser(id: string): boolean {
+    const users = this.getAdminUsers();
+    const target = users.find((u) => u.id === id);
+    if (!target) throw new Error('User not found');
+    const remaining = users.filter((u) => u.id !== id);
+    localStorage.setItem('dopamineflow_admin_users', JSON.stringify(remaining));
+    this.addAuditLog(
+      'USER_DELETED',
+      `Account ${target.email} permanently purged by administrator`,
+      'Dr. Elena Vance (Lead Admin)',
+      'admin@dopamineflow.io'
+    );
+    return true;
+  },
 };
 
 export const api = {
@@ -1073,19 +1146,25 @@ export const api = {
 
   async getAdminUsers(): Promise<{ users: any[] }> {
     const res = await safeFetchJson<{ users: any[] }>('/api/admin/users');
-    if (res.ok && res.data?.users) return res.data;
+    if (res.ok && res.data?.users) {
+      // Sync fetched users to local storage
+      try {
+        localStorage.setItem('dopamineflow_admin_users', JSON.stringify(res.data.users));
+      } catch {}
+      return res.data;
+    }
 
     return {
-      users: DEFAULT_USERS.map((u) => ({
-        ...u,
-        status: u.isActive ? 'ACTIVE' : 'SUSPENDED',
-        entriesCount: u.id === 'usr_alex' ? 28 : 14,
-        createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'Aug 15, 2026',
-      })),
+      users: localStore.getAdminUsers(),
     };
   },
 
   async updateUserStatus(id: string, status: string): Promise<{ success: boolean; user?: any }> {
+    const currentUser = localStore.getUser();
+    if (!currentUser || currentUser.role !== 'ADMIN') {
+      throw new Error('Access Denied: Only administrators have permission to suspend or activate accounts.');
+    }
+
     const res = await safeFetchJson<{ success: boolean; user?: any }>(
       `/api/admin/users/${id}/status`,
       {
@@ -1094,18 +1173,23 @@ export const api = {
         body: JSON.stringify({ status }),
       }
     );
-    if (res.ok) return res.data || { success: true };
+    if (res.ok && res.data) {
+      try {
+        localStore.updateUserStatus(id, status as any);
+      } catch {}
+      return res.data;
+    }
 
-    localStore.addAuditLog(
-      status === 'ACTIVE' ? 'USER_ACTIVATED' : 'USER_SUSPENDED',
-      `User ${id} status updated to ${status}`,
-      'Administrator',
-      'admin@dopamineflow.io'
-    );
-    return { success: true };
+    const updatedUser = localStore.updateUserStatus(id, status as any);
+    return { success: true, user: updatedUser };
   },
 
   async updateUserRole(id: string, role: string): Promise<{ success: boolean; user?: any }> {
+    const currentUser = localStore.getUser();
+    if (!currentUser || currentUser.role !== 'ADMIN') {
+      throw new Error('Access Denied: Only administrators have permission to change user roles.');
+    }
+
     const res = await safeFetchJson<{ success: boolean; user?: any }>(
       `/api/admin/users/${id}/role`,
       {
@@ -1114,18 +1198,23 @@ export const api = {
         body: JSON.stringify({ role }),
       }
     );
-    if (res.ok) return res.data || { success: true };
+    if (res.ok && res.data) {
+      try {
+        localStore.updateUserRole(id, role as any);
+      } catch {}
+      return res.data;
+    }
 
-    localStore.addAuditLog(
-      'USER_ROLE_UPDATED',
-      `User ${id} role updated to ${role}`,
-      'Administrator',
-      'admin@dopamineflow.io'
-    );
-    return { success: true };
+    const updatedUser = localStore.updateUserRole(id, role as any);
+    return { success: true, user: updatedUser };
   },
 
   async updateAdminUser(id: string, updates: Partial<User>): Promise<{ user: User }> {
+    const currentUser = localStore.getUser();
+    if (!currentUser || currentUser.role !== 'ADMIN') {
+      throw new Error('Access Denied: Only administrators have permission to update user profiles.');
+    }
+
     const res = await safeFetchJson<{ user: User }>(`/api/admin/users/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -1133,20 +1222,25 @@ export const api = {
     });
     if (res.ok && res.data?.user) return res.data;
 
-    const u = DEFAULT_USERS.find((x) => x.id === id) || DEFAULT_USERS[0];
+    const u = localStore.getAdminUsers().find((x) => x.id === id) || DEFAULT_USERS[0];
     return { user: { ...u, ...updates } };
   },
 
   async deleteAdminUser(id: string): Promise<{ success: boolean }> {
-    const res = await safeFetchJson(`/api/admin/users/${id}`, { method: 'DELETE' });
-    if (res.ok) return { success: true };
+    const currentUser = localStore.getUser();
+    if (!currentUser || currentUser.role !== 'ADMIN') {
+      throw new Error('Access Denied: Only administrators have permission to delete user accounts.');
+    }
 
-    localStore.addAuditLog(
-      'USER_DELETED',
-      `User account ${id} permanently removed`,
-      'Administrator',
-      'admin@dopamineflow.io'
-    );
+    const res = await safeFetchJson(`/api/admin/users/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      try {
+        localStore.deleteUser(id);
+      } catch {}
+      return { success: true };
+    }
+
+    localStore.deleteUser(id);
     return { success: true };
   },
 

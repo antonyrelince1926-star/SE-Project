@@ -1,6 +1,6 @@
 {
   "name": "Digital Well-Being & Dopamine Habit Analyzer",
-  "description": "Enterprise-grade digital well-being, habit tracking, and dopamine health analytics SaaS platform with AI-powered personalized insights and admin controls.",
+  "description": "Evidence-based digital well-being, habit tracking, and dopamine health intelligence platform with continuous streaks and AI-powered recommendations.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

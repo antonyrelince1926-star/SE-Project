@@ -11,7 +11,6 @@ import {
   BookOpen,
   Award,
   Settings,
-  ShieldAlert,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -76,34 +75,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView })
             })}
           </nav>
         </div>
-
-        {/* Admin Navigation Section */}
-        {user?.role === 'ADMIN' && (
-          <div>
-            <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-rose-500 dark:text-rose-400 mb-2 flex items-center gap-1.5">
-              <ShieldAlert className="w-3.5 h-3.5" />
-              <span>Admin Center</span>
-            </p>
-            <nav className="space-y-1">
-              <button
-                onClick={() => setCurrentView('admin')}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
-                  currentView === 'admin'
-                    ? 'bg-rose-600 text-white shadow-sm shadow-rose-600/30 font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-rose-50 dark:hover:bg-rose-950/20'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <ShieldAlert className={`w-4 h-4 ${currentView === 'admin' ? 'text-white' : 'text-rose-400'}`} />
-                  <span>Admin Dashboard</span>
-                </div>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400">
-                  MGMT
-                </span>
-              </button>
-            </nav>
-          </div>
-        )}
 
         {/* Quick Health Card In Sidebar */}
         <div className="p-3.5 rounded-2xl bg-gradient-to-br from-indigo-500/5 via-blue-500/5 to-emerald-500/5 border border-indigo-500/10 dark:border-indigo-500/20">

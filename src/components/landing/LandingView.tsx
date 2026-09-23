@@ -10,6 +10,7 @@ import {
   BarChart3,
   Moon,
   Users,
+  Flame,
 } from 'lucide-react';
 
 interface LandingViewProps {
@@ -135,14 +136,14 @@ export const LandingView: React.FC<LandingViewProps> = ({ onEnterApp }) => {
           </div>
 
           <div className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6">
-              <Shield className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-6">
+              <Flame className="w-6 h-6 fill-amber-500 text-amber-500" />
             </div>
             <h3 className="text-lg font-bold text-white mb-2">
-              Enterprise Admin Portal
+              Habit Streaks & Neuro-Protocols
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Comprehensive administrative portal with role-based access control (RBAC), user directory management, and SOC2/HIPAA immutable audit logging.
+              Maintain unbroken consistency streaks, unlock neurological milestone badges, and receive automated circadian and digital stimulus recommendations.
             </p>
           </div>
         </div>
