@@ -933,7 +933,17 @@ app.get('/api/auth/me', (req, res) => {
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body;
   const cleanEmail = (email || '').trim().toLowerCase();
-  const user = users.find((u) => u.email.toLowerCase() === cleanEmail);
+  let user = users.find((u) => u.email.toLowerCase() === cleanEmail);
+
+  if (!user) {
+    if (cleanEmail === 'alex@example.com' || cleanEmail === 'alex@cit.edu.in') {
+      user = users.find((u) => u.id === 'usr_alex');
+    } else if (cleanEmail === 'admin@example.com' || cleanEmail === 'admin@dopamineflow.io') {
+      user = users.find((u) => u.id === 'usr_admin');
+    } else if (cleanEmail === 'sophia@example.com' || cleanEmail === 'sophia.c@metaverse.org') {
+      user = users.find((u) => u.id === 'usr_sophia');
+    }
+  }
 
   if (user) {
     if (!user.isActive) {
@@ -1747,6 +1757,10 @@ app.get('/api/reports/export-csv', (req, res) => {
 
 // Vite middleware & Static Serving
 async function startServer() {
+  if (process.env.VERCEL) {
+    return;
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -1766,4 +1780,9 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  startServer();
+}
+
+export { app };
+export default app;
