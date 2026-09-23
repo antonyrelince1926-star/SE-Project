@@ -2243,6 +2243,18 @@ app.get('/api/reports/export-csv', (req, res) => {
   res.send(csvContent);
 });
 
+// Download README.md Endpoint
+app.get('/api/readme', (req, res) => {
+  const readmePath = path.join(process.cwd(), 'README.md');
+  if (fs.existsSync(readmePath)) {
+    res.setHeader('Content-Type', 'text/markdown');
+    res.setHeader('Content-Disposition', 'attachment; filename="README.md"');
+    res.sendFile(readmePath);
+  } else {
+    res.status(404).json({ error: 'README.md not found' });
+  }
+});
+
 // Vite middleware & Static Serving
 async function startServer() {
   if (process.env.VERCEL) {

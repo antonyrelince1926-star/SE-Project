@@ -23,7 +23,7 @@ interface HistoryViewProps {
 }
 
 export const HistoryView: React.FC<HistoryViewProps> = ({ entries, setEntries }) => {
-  const { showToast } = useAuth();
+  const { user, showToast } = useAuth();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedRisk, setSelectedRisk] = useState<string>('all');
   const [inspectEntry, setInspectEntry] = useState<DailyEntry | null>(null);

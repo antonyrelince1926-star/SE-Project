@@ -1,6 +1,6 @@
-# DopamineFlow — Digital Well-Being & Neuro-Habit Intelligence Platform
+# DopamineFlow — Digital Well-Being & Dopamine Habit Analyzer
 
-> **Evidence-based digital well-being, neuro-dopamine health intelligence, and authentic longitudinal habit analytics.**
+> **Evidence-based digital well-being, neuro-dopamine health intelligence, and authentic longitudinal habit analytics SaaS platform.**
 
 ---
 
@@ -17,7 +17,7 @@ Unlike conventional productivity tools that rely on artificial metrics or arbitr
 ### 1. Genuine Consecutive Streak Computation
 * **True Active Days**: When a new user registers an account, they start with a genuine **1-Day Active Streak** and an initial Day 1 baseline entry.
 * **Algorithm**: The streak calculation algorithm (`calculateUserStreak` in `server.ts` and `calculateStreakFromEntries` in `src/services/api.ts`) sorts unique calendar dates in descending order and iteratively validates unbroken consecutive days from today/yesterday.
-* **Zero Artificial Padding**: There are no hardcoded arbitrary fallback streaks (e.g. 28 or 30 days) across the entire codebase. Every badge, metric card, and report reads directly from live telemetry.
+* **Zero Artificial Padding**: There are no hardcoded arbitrary fallback streaks across the codebase. Every badge, metric card, and report reads directly from live telemetry.
 
 ### 2. Full Ecosystem Integration
 The authentic streak dynamically cascades across all subsystems:
@@ -53,7 +53,7 @@ The authentic streak dynamically cascades across all subsystems:
 
 ## 🛠️ Technology Stack
 
-| Layer | Technologies |
+| Layer | Technology |
 |---|---|
 | **Frontend Framework** | React 19, TypeScript, Vite |
 | **Styling & Design System** | Tailwind CSS v4, Lucide React icons, Canvas Confetti |
@@ -64,7 +64,7 @@ The authentic streak dynamically cascades across all subsystems:
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started & Installation
 
 ### Prerequisites
 - Node.js 18+ (Node.js 20+ recommended)
