@@ -1469,6 +1469,36 @@ Provide a structured JSON response (strictly valid JSON with no markdown tags or
 });
 
 // Admin APIs
+app.get('/api/admin/overview', (req, res) => {
+  const activeCount = users.filter((u) => u.isActive).length;
+  const avgScreenTime = (
+    dailyEntries.reduce((sum, e) => sum + e.screenTimeHours, 0) / (dailyEntries.length || 1)
+  ).toFixed(1);
+  const avgDopamine = Math.round(
+    dailyEntries.reduce((sum, e) => sum + e.scores.dopamineScore, 0) / (dailyEntries.length || 1)
+  );
+  const avgWellBeing = Math.round(
+    dailyEntries.reduce((sum, e) => sum + e.scores.wellBeingScore, 0) / (dailyEntries.length || 1)
+  );
+  const highRiskCount = dailyEntries.filter(
+    (e) => e.scores.riskLevel === 'High' || e.scores.riskLevel === 'Severe'
+  ).length;
+
+  res.json({
+    totalUsers: users.length,
+    activeUsers: activeCount,
+    totalHabitEntries: dailyEntries.length,
+    averagePlatformDopamineScore: avgDopamine,
+    averagePlatformWellBeing: avgWellBeing,
+    averageScreenTimeHours: Number(avgScreenTime),
+    highRiskUsersCount: highRiskCount,
+    systemHealth: 'OPTIMAL',
+    aiEngineStatus: 'OPERATIONAL',
+    activeAlertsCount: highRiskCount,
+    recentActivityTimestamp: new Date().toISOString(),
+  });
+});
+
 app.get('/api/admin/metrics', (req, res) => {
   const activeCount = users.filter((u) => u.isActive).length;
   const avgScreenTime = (
@@ -1499,7 +1529,82 @@ app.get('/api/admin/metrics', (req, res) => {
 });
 
 app.get('/api/admin/users', (req, res) => {
-  res.json({ users });
+  const enrichedUsers = users.map((u) => {
+    const userEntries = dailyEntries.filter((e) => e.userId === u.id);
+    return {
+      ...u,
+      status: u.isActive ? 'ACTIVE' : 'SUSPENDED',
+      entriesCount: userEntries.length,
+      createdAt: new Date(u.createdAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    };
+  });
+  res.json({ users: enrichedUsers });
+});
+
+app.patch('/api/admin/users/:id/status', (req, res) => {
+  const adminUser = getAuthUser(req) || users.find((u) => u.role === 'ADMIN') || users[1];
+  const { id } = req.params;
+  const { status } = req.body;
+  const user = users.find((u) => u.id === id);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  user.isActive = status === 'ACTIVE';
+
+  auditLogs.unshift({
+    id: `aud_${Date.now()}`,
+    action: status === 'ACTIVE' ? 'USER_ACTIVATED' : 'USER_SUSPENDED',
+    details: `Admin changed account operational status of ${user.email} to ${status}`,
+    performedBy: adminUser.name,
+    userEmail: adminUser.email,
+    timestamp: new Date().toISOString(),
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  const enrichedUser = {
+    ...user,
+    status: user.isActive ? 'ACTIVE' : 'SUSPENDED',
+    entriesCount: dailyEntries.filter((e) => e.userId === user.id).length,
+  };
+
+  res.json({ success: true, user: enrichedUser });
+});
+
+app.patch('/api/admin/users/:id/role', (req, res) => {
+  const adminUser = getAuthUser(req) || users.find((u) => u.role === 'ADMIN') || users[1];
+  const { id } = req.params;
+  const { role } = req.body;
+  const user = users.find((u) => u.id === id);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  user.role = role === 'ADMIN' ? 'ADMIN' : 'USER';
+
+  auditLogs.unshift({
+    id: `aud_${Date.now()}`,
+    action: user.role === 'ADMIN' ? 'USER_PROMOTED_ADMIN' : 'USER_DEMOTED_MEMBER',
+    details: `Admin modified permission tier of ${user.email} to ${user.role}`,
+    performedBy: adminUser.name,
+    userEmail: adminUser.email,
+    timestamp: new Date().toISOString(),
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  const enrichedUser = {
+    ...user,
+    status: user.isActive ? 'ACTIVE' : 'SUSPENDED',
+    entriesCount: dailyEntries.filter((e) => e.userId === user.id).length,
+  };
+
+  res.json({ success: true, user: enrichedUser });
 });
 
 app.patch('/api/admin/users/:id', (req, res) => {
@@ -1518,7 +1623,12 @@ app.patch('/api/admin/users/:id', (req, res) => {
       ipAddress: req.ip || '127.0.0.1',
       status: 'SUCCESS',
     });
-    return res.json({ user });
+    const enrichedUser = {
+      ...user,
+      status: user.isActive ? 'ACTIVE' : 'SUSPENDED',
+      entriesCount: dailyEntries.filter((e) => e.userId === user.id).length,
+    };
+    return res.json({ user: enrichedUser });
   }
   res.status(404).json({ error: 'User not found' });
 });
