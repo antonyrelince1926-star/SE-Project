@@ -131,7 +131,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   title="Current Active Daily Consistency Streak"
                 >
                   <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                  <span>{user.streak ?? 28}d Streak</span>
+                  <span>{user.streak ?? 1}d Streak</span>
                 </div>
 
                 {/* Quick Action: Log Habits */}
@@ -292,7 +292,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <div className="flex items-center gap-1.5 mt-1.5">
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1">
                           <Flame className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-                          {user.streak ?? 28}d Streak
+                          {user.streak ?? 1}d Streak
                         </span>
                       </div>
                     </div>

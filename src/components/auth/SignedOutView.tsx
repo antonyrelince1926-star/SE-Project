@@ -62,7 +62,7 @@ export const SignedOutView: React.FC = () => {
                 <span className="font-bold text-sm text-white">Alex Rivera</span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center gap-1">
                   <Flame className="w-3 h-3 fill-amber-400 text-amber-400" />
-                  28d Streak
+                  30d Streak
                 </span>
               </div>
               <p className="text-xs text-indigo-200/70">Personal Active Workspace</p>

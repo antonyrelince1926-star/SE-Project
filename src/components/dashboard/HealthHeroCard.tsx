@@ -14,7 +14,7 @@ export const HealthHeroCard: React.FC<HealthHeroCardProps> = ({
   scores,
   latestDate,
   onOpenTracker,
-  streak = 28,
+  streak = 1,
 }) => {
   const burnout = getBurnoutBadge(scores.burnoutLevel);
   const riskColor = getRiskColor(scores.riskLevel);
@@ -71,7 +71,7 @@ export const HealthHeroCard: React.FC<HealthHeroCardProps> = ({
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1">
                 <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                {streak} Day Active Streak
+                {streak} {streak === 1 ? 'Day' : 'Days'} Active Streak
               </span>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${riskColor}`}>
                 {scores.riskLevel} Risk State
@@ -96,7 +96,7 @@ export const HealthHeroCard: React.FC<HealthHeroCardProps> = ({
                 </span>
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-xl leading-relaxed">
-                Calculated from your sleep duration, screen velocity, deep work sessions, and physical recovery with active {streak}-day continuous tracking. Last recorded on {latestDate}.
+                Calculated from your sleep duration, screen velocity, deep work sessions, and physical recovery {streak === 1 ? 'with active Day 1 baseline tracking' : `with active ${streak}-day continuous tracking`}. Last recorded on {latestDate}.
               </p>
             </div>
           </div>

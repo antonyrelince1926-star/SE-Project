@@ -7,8 +7,15 @@ interface ReportsViewProps {
 }
 
 export const ReportsView: React.FC<ReportsViewProps> = ({ entries }) => {
-  const [period, setPeriod] = useState<'weekly' | 'monthly' | 'streak28'>('streak28');
-  const count = period === 'weekly' ? 7 : period === 'monthly' ? 14 : 28;
+  const [period, setPeriod] = useState<'weekly' | 'biweekly' | 'monthly' | 'all'>('monthly');
+  const count =
+    period === 'weekly'
+      ? 7
+      : period === 'biweekly'
+      ? 14
+      : period === 'monthly'
+      ? 30
+      : entries.length || 1;
   const recent = entries.slice(0, count);
 
   const avgDopamine = Math.round(
@@ -55,37 +62,47 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ entries }) => {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium">
+          <div className="flex flex-wrap items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-medium">
             <button
               onClick={() => setPeriod('weekly')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
                 period === 'weekly'
                   ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs'
                   : 'text-slate-500'
               }`}
             >
-              7-Day Audit
+              7-Day
+            </button>
+            <button
+              onClick={() => setPeriod('biweekly')}
+              className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
+                period === 'biweekly'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs'
+                  : 'text-slate-500'
+              }`}
+            >
+              14-Day
             </button>
             <button
               onClick={() => setPeriod('monthly')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
                 period === 'monthly'
                   ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 font-semibold shadow-xs'
                   : 'text-slate-500'
               }`}
             >
-              14-Day Cohort
+              30-Day
             </button>
             <button
-              onClick={() => setPeriod('streak28')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 ${
-                period === 'streak28'
+              onClick={() => setPeriod('all')}
+              className={`px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                period === 'all'
                   ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 font-semibold shadow-xs'
                   : 'text-slate-500'
               }`}
             >
               <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-              <span>28-Day Full Streak Audit</span>
+              <span>All ({entries.length}d)</span>
             </button>
           </div>
 
@@ -111,11 +128,11 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ entries }) => {
               Neuro-Habit & Digital Health Executive Brief
             </h3>
             <p className="text-xs text-slate-400 mt-1 flex items-center gap-2 flex-wrap">
-              <span>Sample Period: Last {count} days</span>
+              <span>Sample Period: {Math.min(count, entries.length)} {Math.min(count, entries.length) === 1 ? 'day analyzed (Day 1 Baseline)' : 'days analyzed'}</span>
               <span>•</span>
               <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
                 <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                Active Streak: {entries.length >= 28 ? '28 Days Continuous' : `${entries.length} Days Continuous`}
+                Active Streak: {entries.length === 1 ? '1 Day Continuous (Day 1 Baseline)' : `${entries.length} Days Continuous`}
               </span>
               <span>•</span>
               <span>Report ID: DF-AUDIT-{Date.now().toString().slice(-6)}</span>

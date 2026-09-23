@@ -104,7 +104,7 @@ const DEFAULT_USERS: User[] = [
     role: 'USER',
     avatar:
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    streak: 28,
+    streak: 30,
     isVerified: true,
     isActive: true,
     createdAt: '2026-08-15T09:00:00Z',
@@ -276,6 +276,63 @@ function generateSeedEntries(userId: string): DailyEntry[] {
   });
 }
 
+function generateInitialDay1Entry(userId: string): DailyEntry[] {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const scores = calculateHabitScores({
+    screenTimeHours: 4.8,
+    socialMediaHours: 1.0,
+    gamingHours: 0.0,
+    studyHours: 3.0,
+    workHours: 5.5,
+    sleepHours: 7.5,
+    exerciseMinutes: 30,
+    meditationMinutes: 10,
+    waterIntakeLiters: 2.4,
+    mood: 4,
+  });
+
+  return [
+    {
+      id: `ent_local_${userId}_day1`,
+      userId,
+      date: todayStr,
+      screenTimeHours: 4.8,
+      socialMediaHours: 1.0,
+      gamingHours: 0.0,
+      studyHours: 3.0,
+      workHours: 5.5,
+      sleepHours: 7.5,
+      exerciseMinutes: 30,
+      meditationMinutes: 10,
+      waterIntakeLiters: 2.4,
+      mood: 4,
+      notes: 'Day 1 of Dopamine Detox Habit Journey initialized.',
+      scores,
+      createdAt: new Date().toISOString(),
+    },
+  ];
+}
+
+function calculateStreakFromEntries(entries: DailyEntry[]): number {
+  if (entries.length === 0) return 0;
+  const uniqueDates = Array.from(new Set(entries.map((e) => e.date.split('T')[0]))).sort().reverse();
+  if (uniqueDates.length === 0) return 0;
+  let streak = 1;
+  let prevDate = new Date(uniqueDates[0] + 'T00:00:00Z');
+  for (let i = 1; i < uniqueDates.length; i++) {
+    const currDate = new Date(uniqueDates[i] + 'T00:00:00Z');
+    const diffTime = prevDate.getTime() - currDate.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays === 1) {
+      streak++;
+      prevDate = currDate;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
 // In-Browser Local Storage Engine for 100% Guaranteed Reliability on Static Hosts
 const localStore = {
   getUser(): User | null {
@@ -304,7 +361,7 @@ const localStore = {
         return JSON.parse(raw);
       } catch {}
     }
-    const seeded = generateSeedEntries(userId);
+    const seeded = userId === 'usr_alex' ? generateSeedEntries(userId) : generateInitialDay1Entry(userId);
     localStorage.setItem(`${STORAGE_ENTRIES_KEY}_${userId}`, JSON.stringify(seeded));
     return seeded;
   },
@@ -580,7 +637,7 @@ const localStore = {
     const initial = DEFAULT_USERS.map((u) => ({
       ...u,
       status: u.isActive ? 'ACTIVE' : 'SUSPENDED',
-      entriesCount: u.id === 'usr_alex' ? 28 : 14,
+      entriesCount: u.id === 'usr_alex' ? 30 : (localStore.getEntries(u.id).length || 1),
       createdAt: u.createdAt
         ? new Date(u.createdAt).toLocaleDateString('en-US', {
             month: 'short',
@@ -885,7 +942,7 @@ export const api = {
     const uid = entry.userId || localStore.getUser()?.id || 'usr_alex';
     const saved = localStore.saveEntry(uid, entry);
     const all = localStore.getEntries(uid);
-    const newStreak = Math.max(28, all.length);
+    const newStreak = calculateStreakFromEntries(all);
 
     const cur = localStore.getUser();
     if (cur) {
@@ -1060,9 +1117,9 @@ export const api = {
         {
           id: 'notif_1',
           userId: 'usr_alex',
-          title: '🔥 28-Day Neuro-Consistency Milestone!',
+          title: '🔥 30-Day Neuro-Consistency Milestone!',
           message:
-            'You have maintained your biometric habit tracking for 28 consecutive days. Prefrontal cortex plasticity is strengthening.',
+            'You have maintained your biometric habit tracking for 30 consecutive days. Prefrontal cortex plasticity and circadian pathways are stabilized.',
           type: 'milestone',
           isRead: false,
           createdAt: new Date().toISOString(),

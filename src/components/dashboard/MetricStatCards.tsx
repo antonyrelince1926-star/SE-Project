@@ -9,7 +9,7 @@ interface MetricStatCardsProps {
 
 export const MetricStatCards: React.FC<MetricStatCardsProps> = ({
   latestEntry,
-  currentStreak = 28,
+  currentStreak = 1,
 }) => {
   const screenTime = latestEntry ? latestEntry.screenTimeHours : 4.1;
   const socialHours = latestEntry ? latestEntry.socialMediaHours : 0.6;
@@ -19,10 +19,10 @@ export const MetricStatCards: React.FC<MetricStatCardsProps> = ({
   const stats = [
     {
       title: 'Active Habit Streak',
-      value: `${currentStreak} Days`,
-      subtext: 'Consecutive verified check-ins',
+      value: `${currentStreak} ${currentStreak === 1 ? 'Day' : 'Days'}`,
+      subtext: currentStreak === 1 ? 'Day 1 baseline established' : 'Consecutive verified check-ins',
       status: 'good',
-      change: '🔥 Streak Active Today',
+      change: currentStreak === 1 ? '🌟 Day 1 Initiated' : '🔥 Streak Active Today',
       isPositive: true,
       icon: Flame,
       color: 'amber',

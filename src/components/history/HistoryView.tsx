@@ -48,16 +48,26 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ entries, setEntries })
     return matchesSearch && matchesRisk;
   });
 
+  const activeStreak = user?.streak !== undefined ? user.streak : (entries.length > 0 ? entries.length : 1);
+
   return (
     <div className="space-y-6">
       {/* Header and Filter Toolbar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Longitudinal Habit History
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Longitudinal Habit History
+            </h2>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+              <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+              {activeStreak} {activeStreak === 1 ? 'Day Active Streak' : 'Days Active Streak'}
+            </span>
+          </div>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Full chronological archive of daily biometric entries and dopamine score outputs.
+            {entries.length === 1
+              ? 'Day 1 baseline entry verified. Continue logging daily to build consecutive momentum.'
+              : `Full chronological archive of ${entries.length} verified daily habit entries and dopamine scores.`}
           </p>
         </div>
 

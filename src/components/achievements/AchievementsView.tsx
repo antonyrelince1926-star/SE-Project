@@ -13,12 +13,36 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({ entries = []
 
   // Active current streak from user account or entries
   const currentStreak = useMemo(() => {
-    if (user?.streak && user.streak > 0) return user.streak;
+    if (user?.streak !== undefined && user.streak >= 0) return user.streak;
     if (entries.length > 0) return entries.length;
     return 1;
   }, [user?.streak, entries.length]);
 
   const achievements = useMemo(() => [
+    {
+      id: 'streak-1',
+      title: 'Genesis Ignition (Day 1 Active)',
+      description: 'Initialize your dopamine detox baseline and register your first verified active habit check-in.',
+      icon: Sparkles,
+      isUnlocked: currentStreak >= 1,
+      progress: Math.min(100, Math.round((currentStreak / 1) * 100)),
+      dateUnlocked: currentStreak >= 1 ? 'Day 1 Baseline Activated' : undefined,
+      currentStat: `${Math.min(currentStreak, 1)}/1 Day`,
+      xp: 150,
+      color: 'indigo',
+    },
+    {
+      id: 'streak-3',
+      title: '3-Day Discipline Kickstart',
+      description: 'Build unbroken early momentum through 3 continuous days of neural logging.',
+      icon: Zap,
+      isUnlocked: currentStreak >= 3,
+      progress: Math.min(100, Math.round((currentStreak / 3) * 100)),
+      dateUnlocked: currentStreak >= 3 ? '3 Days Momentum Reached' : undefined,
+      currentStat: `${Math.min(currentStreak, 3)}/3 Days`,
+      xp: 200,
+      color: 'blue',
+    },
     {
       id: 'streak-7',
       title: 'Pioneer Streak (7-Day Consistency)',

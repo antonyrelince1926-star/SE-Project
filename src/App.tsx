@@ -67,7 +67,7 @@ const AppContent: React.FC = () => {
 
   // Derived current metrics and active streak
   const latestEntry = entries[0];
-  const activeStreak = user?.streak ?? (entries.length > 0 ? entries.length : 28);
+  const activeStreak = user?.streak !== undefined ? user.streak : (entries.length > 0 ? entries.length : 1);
   const currentScores =
     latestEntry?.scores ||
     calculateHabitScores({
@@ -171,7 +171,15 @@ const AppContent: React.FC = () => {
                             ? 'Elite 30+ Day Habit Formator. Your synaptic pathways are fully stabilized.'
                             : activeStreak >= 21
                             ? `Only ${30 - activeStreak} days until the 30-Day Circadian & Dopamine Mastery milestone!`
-                            : `Only ${21 - activeStreak} days until the 21-Day Neuro-Plasticity milestone!`}
+                            : activeStreak >= 14
+                            ? `Only ${21 - activeStreak} days until the 21-Day Neuro-Plasticity milestone!`
+                            : activeStreak >= 7
+                            ? `Only ${14 - activeStreak} days until the 14-Day Neuro-Sync milestone!`
+                            : activeStreak >= 3
+                            ? `Great momentum! Only ${7 - activeStreak} days until the 7-Day Week Warrior milestone!`
+                            : activeStreak === 1
+                            ? 'Day 1 baseline recorded! Log tomorrow to reach a 2-day streak and start compounding habits.'
+                            : 'Log today’s habits to initiate your active streak.'}
                         </p>
                       </div>
                     </div>
@@ -189,7 +197,7 @@ const AppContent: React.FC = () => {
 
                   {/* Dashboard Quick Visualizers */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left: 7-Day Trend Preview */}
+                    {/* Left: Biometric Correlation Snapshot */}
                     <div className="lg:col-span-2 p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between">
                       <div className="flex items-center justify-between mb-4">
                         <div>
@@ -198,7 +206,9 @@ const AppContent: React.FC = () => {
                             Biometric Correlation Snapshot
                           </h3>
                           <p className="text-xs text-slate-400">
-                            Trajectory of dopamine recovery against digital exposure limits.
+                            {entries.length === 1
+                              ? 'Day 1 baseline telemetry recorded. Track daily to view your multi-day correlation trajectory.'
+                              : 'Trajectory of dopamine recovery against digital exposure limits.'}
                           </p>
                         </div>
                         <button
@@ -211,30 +221,49 @@ const AppContent: React.FC = () => {
                       </div>
 
                       <div className="space-y-3">
-                        {entries.slice(0, 4).map((entry) => (
-                          <div
-                            key={entry.id}
-                            className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex items-center justify-between"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
-                                {entry.scores.dopamineScore}
-                              </div>
-                              <div>
-                                <p className="text-xs font-bold text-slate-900 dark:text-white">
-                                  {entry.date}
-                                </p>
-                                <p className="text-[10px] text-slate-400">
-                                  Screen: {entry.screenTimeHours}h • Social: {entry.socialMediaHours}h • Sleep: {entry.sleepHours}h
-                                </p>
-                              </div>
-                            </div>
-
-                            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                              {entry.scores.wellBeingScore}% Well-Being
-                            </span>
+                        {entries.length === 0 ? (
+                          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-dashed border-slate-300 dark:border-slate-700 text-center">
+                            <p className="text-xs text-slate-500">No habit logs recorded yet.</p>
+                            <button
+                              onClick={() => setIsDailyTrackerOpen(true)}
+                              className="mt-2 text-xs font-bold text-indigo-600 hover:underline"
+                            >
+                              Log your Day 1 baseline
+                            </button>
                           </div>
-                        ))}
+                        ) : (
+                          entries.slice(0, 4).map((entry, idx) => (
+                            <div
+                              key={entry.id}
+                              className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 flex items-center justify-between"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
+                                  {entry.scores.dopamineScore}
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-xs font-bold text-slate-900 dark:text-white">
+                                      {entry.date}
+                                    </p>
+                                    {entries.length === 1 && idx === 0 && (
+                                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+                                        Day 1 Baseline
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-[10px] text-slate-400">
+                                    Screen: {entry.screenTimeHours}h • Social: {entry.socialMediaHours}h • Sleep: {entry.sleepHours}h
+                                  </p>
+                                </div>
+                              </div>
+
+                              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                                {entry.scores.wellBeingScore}% Well-Being
+                              </span>
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
 
