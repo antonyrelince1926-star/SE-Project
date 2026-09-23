@@ -1719,6 +1719,9 @@ app.get('/api/goals', (req, res) => {
     seedNewUserInitialData(authUser.id, authUser.name, authUser.email);
     userGoals = goals.filter((g) => g.userId === authUser.id);
   }
+  if (authUser.id !== 'usr_alex') {
+    userGoals = userGoals.map((g) => ({ ...g, streak: Math.min(g.streak, 1) }));
+  }
   res.json({ goals: userGoals });
 });
 
@@ -2252,6 +2255,84 @@ app.get('/api/readme', (req, res) => {
     res.sendFile(readmePath);
   } else {
     res.status(404).json({ error: 'README.md not found' });
+  }
+});
+
+// Download SRS Markdown
+app.get('/api/srs/download-markdown', (req, res) => {
+  const filePath = path.join(process.cwd(), 'public', 'docs', 'SRS_Digital_Wellbeing_Dopamine_Analyzer.md');
+  if (fs.existsSync(filePath)) {
+    res.setHeader('Content-Type', 'text/markdown');
+    res.setHeader('Content-Disposition', 'attachment; filename="SRS_Digital_Wellbeing_Dopamine_Analyzer.md"');
+    res.sendFile(filePath);
+  } else {
+    res.status(404).json({ error: 'SRS Markdown file not found' });
+  }
+});
+
+// Download SRS Word Doc (.docx format)
+app.get('/api/srs/download-word', (req, res) => {
+  const filePath = path.join(process.cwd(), 'public', 'docs', 'SRS_Digital_Wellbeing_Dopamine_Analyzer.md');
+  if (fs.existsSync(filePath)) {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const htmlDoc = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>SRS - Digital Well-Being & Dopamine Habit Analyzer</title>
+        <style>
+          body { font-family: 'Calibri', 'Arial', sans-serif; line-height: 1.6; margin: 40px; color: #111; }
+          h1, h2, h3 { color: #1e3a8a; }
+          table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+          th, td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; font-size: 14px; }
+          th { background-color: #f1f5f9; }
+        </style>
+      </head>
+      <body>
+        <pre style="white-space: pre-wrap; font-family: inherit;">${content}</pre>
+      </body>
+      </html>
+    `;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', 'attachment; filename="SRS_Digital_Wellbeing_Dopamine_Analyzer.docx"');
+    res.send(htmlDoc);
+  } else {
+    res.status(404).json({ error: 'SRS file not found' });
+  }
+});
+
+// Download SRS PDF (Rendered printable view)
+app.get('/api/srs/download-pdf', (req, res) => {
+  const filePath = path.join(process.cwd(), 'public', 'docs', 'SRS_Digital_Wellbeing_Dopamine_Analyzer.md');
+  if (fs.existsSync(filePath)) {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const htmlDoc = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>SRS - Digital Well-Being & Dopamine Habit Analyzer</title>
+        <style>
+          body { font-family: 'Times New Roman', serif; line-height: 1.8; margin: 60px; color: #000; }
+          h1, h2, h3 { color: #000; text-transform: uppercase; }
+          table { border-collapse: collapse; width: 100%; margin: 20px 0; page-break-inside: avoid; }
+          th, td { border: 1px solid #000; padding: 8px 12px; text-align: left; font-size: 13px; }
+          th { background-color: #eee; }
+          @media print {
+            body { margin: 20mm; }
+          }
+        </style>
+      </head>
+      <body onload="window.print()">
+        <pre style="white-space: pre-wrap; font-family: inherit;">${content}</pre>
+      </body>
+      </html>
+    `;
+    res.setHeader('Content-Type', 'text/html');
+    res.send(htmlDoc);
+  } else {
+    res.status(404).json({ error: 'SRS file not found' });
   }
 });
 

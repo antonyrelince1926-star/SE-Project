@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { DailyEntry } from '../../types';
-import { FileText, Printer, Download, ShieldCheck, AlertCircle, Award, CheckCircle, Flame } from 'lucide-react';
+import { FileText, ShieldCheck, AlertCircle, Award, CheckCircle, Flame } from 'lucide-react';
 
 interface ReportsViewProps {
   entries: DailyEntry[];
@@ -43,10 +43,6 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ entries }) => {
     grade = 'A-';
     gradeSub = 'Healthy Attentional Homeostasis';
   }
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   return (
     <div className="space-y-6">
@@ -105,23 +101,6 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ entries }) => {
               <span>All ({entries.length}d)</span>
             </button>
           </div>
-
-          <a
-            href="/api/readme"
-            download
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 shadow-xs cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Download README.md</span>
-          </a>
-
-          <button
-            onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 shadow-xs border border-slate-700"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Print Report</span>
-          </button>
         </div>
       </div>
 

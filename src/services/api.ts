@@ -408,11 +408,21 @@ const localStore = {
   },
   getGoals(userId: string): Goal[] {
     const raw = localStorage.getItem(`${STORAGE_GOALS_KEY}_${userId}`);
+    const isAlex = userId === 'usr_alex';
+    const currentUser = this.getUser();
+    const isNewUser = !isAlex && ((currentUser?.streak ?? 1) <= 1 || this.getEntries(userId).length <= 1);
+
     if (raw) {
       try {
-        return JSON.parse(raw);
+        let parsed = JSON.parse(raw);
+        if (isNewUser) {
+          parsed = parsed.map((g: Goal) => ({ ...g, streak: Math.min(g.streak, 1) }));
+          localStorage.setItem(`${STORAGE_GOALS_KEY}_${userId}`, JSON.stringify(parsed));
+        }
+        return parsed;
       } catch {}
     }
+    const goalStreak = isAlex ? 30 : 1;
     const defaultGoals: Goal[] = [
       {
         id: `goal_1`,
@@ -424,7 +434,7 @@ const localStore = {
         unit: 'hours',
         period: 'daily',
         isCompleted: true,
-        streak: 5,
+        streak: isAlex ? 30 : 1,
         deadline: '2026-10-30',
       },
       {
@@ -437,7 +447,7 @@ const localStore = {
         unit: 'hours',
         period: 'daily',
         isCompleted: false,
-        streak: 3,
+        streak: isAlex ? 30 : 1,
         deadline: '2026-10-30',
       },
       {
@@ -450,7 +460,7 @@ const localStore = {
         unit: 'mins',
         period: 'daily',
         isCompleted: false,
-        streak: 7,
+        streak: isAlex ? 25 : 1,
         deadline: '2026-10-30',
       },
       {
@@ -463,7 +473,7 @@ const localStore = {
         unit: 'hours',
         period: 'daily',
         isCompleted: true,
-        streak: 12,
+        streak: isAlex ? 30 : 1,
         deadline: '2026-10-30',
       },
     ];
