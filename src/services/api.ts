@@ -325,7 +325,13 @@ const localStore = {
     const raw = localStorage.getItem(`${STORAGE_ENTRIES_KEY}_${userId}`);
     if (raw) {
       try {
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (userId === 'usr_alex' && parsed.length < 30) {
+          const seeded = generateSeedEntries(userId);
+          localStorage.setItem(`${STORAGE_ENTRIES_KEY}_${userId}`, JSON.stringify(seeded));
+          return seeded;
+        }
+        return parsed;
       } catch {}
     }
     const seeded = userId === 'usr_alex' ? generateSeedEntries(userId) : generateInitialDay1Entry(userId);
