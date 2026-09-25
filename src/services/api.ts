@@ -168,78 +168,45 @@ function generateSeedEntries(userId: string): DailyEntry[] {
     return d.toISOString().split('T')[0];
   };
 
-  const seed = [
-    {
-      daysAgo: 0,
-      screenTimeHours: 4.5,
-      socialMediaHours: 1.2,
-      gamingHours: 0,
-      studyHours: 3.5,
-      workHours: 5.5,
-      sleepHours: 7.5,
-      exerciseMinutes: 35,
-      meditationMinutes: 10,
-      waterIntakeLiters: 2.5,
-      mood: 4,
-      notes: 'Maintained strict 90-minute focus blocks and morning natural light exposure.',
-    },
-    {
-      daysAgo: 1,
-      screenTimeHours: 5.0,
-      socialMediaHours: 1.5,
-      gamingHours: 0.5,
-      studyHours: 3.0,
-      workHours: 5.0,
-      sleepHours: 7.0,
-      exerciseMinutes: 30,
-      meditationMinutes: 10,
-      waterIntakeLiters: 2.2,
-      mood: 4,
-      notes: 'Applied grayscale filter during evening study session. Reduced habitual checking.',
-    },
-    {
-      daysAgo: 2,
-      screenTimeHours: 5.5,
-      socialMediaHours: 1.8,
-      gamingHours: 0,
-      studyHours: 2.5,
-      workHours: 6.0,
-      sleepHours: 6.8,
-      exerciseMinutes: 20,
-      meditationMinutes: 5,
-      waterIntakeLiters: 2.0,
-      mood: 3,
-      notes: 'Solid productive workday. Slight fatigue in the mid-afternoon.',
-    },
-    {
-      daysAgo: 3,
-      screenTimeHours: 6.0,
-      socialMediaHours: 2.2,
-      gamingHours: 1.0,
-      studyHours: 2.0,
-      workHours: 5.5,
-      sleepHours: 6.5,
-      exerciseMinutes: 20,
-      meditationMinutes: 0,
-      waterIntakeLiters: 1.8,
-      mood: 3,
-      notes: 'Resisted infinite scrolling after dinner by charging phone in living room.',
-    },
-    {
-      daysAgo: 4,
-      screenTimeHours: 7.2,
-      socialMediaHours: 3.0,
-      gamingHours: 1.5,
-      studyHours: 1.5,
-      workHours: 5.0,
-      sleepHours: 6.0,
-      exerciseMinutes: 15,
-      meditationMinutes: 5,
-      waterIntakeLiters: 1.5,
-      mood: 2,
-      notes: 'Notification temptation was high today. Completed a 5-min NSDR reset.',
-    },
-  ];
+  const seed = Array.from({ length: 30 }, (_, i) => {
+    const daysAgo = 29 - i;
+    const progressFactor = i / 29; // 0 at start (29 days ago), 1 at today
+    const screenTimeHours = Number((8.8 - progressFactor * 4.7).toFixed(1));
+    const socialMediaHours = Number((4.5 - progressFactor * 3.9).toFixed(1));
+    const gamingHours = Math.max(0, Number((2.2 - progressFactor * 2.2).toFixed(1)));
+    const studyHours = Number((1.2 + progressFactor * 2.8).toFixed(1));
+    const workHours = Number((4.5 + progressFactor * 1.5).toFixed(1));
+    const sleepHours = Number((5.2 + progressFactor * 2.6).toFixed(1));
+    const exerciseMinutes = Math.min(45, Math.round(10 + progressFactor * 30));
+    const meditationMinutes = Math.min(20, Math.round(progressFactor * 20));
+    const waterIntakeLiters = Number((1.2 + progressFactor * 1.6).toFixed(1));
+    const mood = Math.min(5, Math.max(1, Math.round(2 + progressFactor * 3)));
+    
+    let notes = '';
+    if (i === 0) notes = 'Starting out feeling overwhelmed by constant phone notifications and late night screen fatigue.';
+    else if (i === 5) notes = 'Placed phone in another room during dinner. First small step in building physical friction.';
+    else if (i === 10) notes = 'Installed grayscale mode on smartphone. Surprising how unappealing social feeds look in monochrome.';
+    else if (i === 15) notes = 'Hit 15-day halfway milestone! Brain fog is almost entirely gone. Urge to check notifications is much lower.';
+    else if (i === 20) notes = '20-day mark passed! Neuroplastic adaptation is noticeable. Impulse to open apps is effectively silenced.';
+    else if (i === 25) notes = 'Digital detox Sunday! Spent afternoon outdoors. Calm emotional baseline, zero anxiety.';
+    else if (i === 29) notes = 'Today has been exceptionally productive. Morning sunlight within 15 min of waking, steady dopamine reserve.';
+    else notes = `Day ${i + 1} of digital well-being optimization. Focus and cognitive clarity improving steadily.`;
+
+    return {
+      daysAgo,
+      screenTimeHours,
+      socialMediaHours,
+      gamingHours,
+      studyHours,
+      workHours,
+      sleepHours,
+      exerciseMinutes,
+      meditationMinutes,
+      waterIntakeLiters,
+      mood,
+      notes,
+    };
+  });
 
   return seed.map((s, idx) => {
     const scores = calculateHabitScores({

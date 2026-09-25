@@ -7,7 +7,6 @@ import { Modal } from '../common/Modal';
 import {
   Search,
   Filter,
-  Trash2,
   Eye,
   Download,
   Calendar,
@@ -28,18 +27,6 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ entries, setEntries })
   const [selectedRisk, setSelectedRisk] = useState<string>('all');
   const [inspectEntry, setInspectEntry] = useState<DailyEntry | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this habit entry log?')) return;
-    try {
-      await api.deleteEntry(id);
-      setEntries((prev) => prev.filter((e) => e.id !== id));
-      showToast('Habit entry deleted', 'info');
-      if (inspectEntry?.id === id) setInspectEntry(null);
-    } catch (e) {
-      showToast('Failed to delete entry', 'error');
-    }
-  };
-
   const filtered = entries.filter((e) => {
     const matchesSearch =
       e.date.includes(searchTerm) ||
@@ -47,6 +34,61 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ entries, setEntries })
     const matchesRisk = selectedRisk === 'all' || e.scores.riskLevel === selectedRisk;
     return matchesSearch && matchesRisk;
   });
+
+  const handleExportCsv = () => {
+    if (entries.length === 0) {
+      alert('No entries to export.');
+      return;
+    }
+    const headers = [
+      'Date',
+      'Dopamine Index',
+      'Well-Being (%)',
+      'Screen Time (h)',
+      'Social Media (h)',
+      'Gaming (h)',
+      'Study (h)',
+      'Work (h)',
+      'Sleep (h)',
+      'Exercise (min)',
+      'Meditation (min)',
+      'Water (L)',
+      'Mood',
+      'Risk Level',
+      'Burnout Level',
+      'Notes'
+    ];
+    const rows = entries.map((e) => [
+      e.date,
+      e.scores.dopamineScore,
+      e.scores.wellBeingScore,
+      e.screenTimeHours,
+      e.socialMediaHours,
+      e.gamingHours,
+      e.studyHours,
+      e.workHours,
+      e.sleepHours,
+      e.exerciseMinutes,
+      e.meditationMinutes,
+      e.waterIntakeLiters,
+      e.mood,
+      e.scores.riskLevel,
+      e.scores.burnoutLevel,
+      `"${(e.notes || '').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `digital_wellbeing_data_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showToast?.('CSV exported successfully', 'success');
+  };
 
   const activeStreak = user?.streak !== undefined ? user.streak : (entries.length > 0 ? entries.length : 1);
 
@@ -71,14 +113,13 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ entries, setEntries })
           </p>
         </div>
 
-        <a
-          href="/api/reports/export-csv"
-          download
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xs"
+        <button
+          onClick={handleExportCsv}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xs cursor-pointer"
         >
           <Download className="w-3.5 h-3.5" />
           <span>Export Complete CSV</span>
-        </a>
+        </button>
       </div>
 
       {/* Filter and Search Bar */}
@@ -175,13 +216,6 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ entries, setEntries })
                             title="Inspect Details"
                           >
                             <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(entry.id)}
-                            className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
