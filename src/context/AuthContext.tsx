@@ -84,9 +84,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
-        // If no token exists on first load, initialize default Alex Rivera active session
+        // If no token exists on first load, initialize default new user active session (streak: 1)
         if (!authStorage.getToken()) {
-          authStorage.setToken('tok_usr_alex_default_session');
+          authStorage.setToken('tok_usr_new_default_session');
         }
 
         const res = await api.getCurrentUser();

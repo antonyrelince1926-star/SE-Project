@@ -98,6 +98,26 @@ async function safeFetchJson<T = any>(
 // Seed Users for resilient client-side fallback
 const DEFAULT_USERS: User[] = [
   {
+    id: 'usr_new',
+    name: 'Jordan Lee',
+    email: 'user@dopamineflow.io',
+    role: 'USER',
+    avatar:
+      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+    streak: 1,
+    isVerified: true,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    lastLoginAt: new Date().toISOString(),
+    settings: {
+      theme: 'system',
+      notificationsEnabled: true,
+      emailDigest: 'weekly',
+      soundEnabled: true,
+      dailyGoalReminderTime: '20:30',
+    },
+  },
+  {
     id: 'usr_alex',
     name: 'Alex Rivera',
     email: 'alex@cit.edu.in',
@@ -169,28 +189,28 @@ function generateSeedEntries(userId: string): DailyEntry[] {
   };
 
   const seed = Array.from({ length: 30 }, (_, i) => {
-    const daysAgo = 29 - i;
-    const progressFactor = i / 29; // 0 at start (29 days ago), 1 at today
-    const screenTimeHours = Number((8.8 - progressFactor * 4.7).toFixed(1));
-    const socialMediaHours = Number((4.5 - progressFactor * 3.9).toFixed(1));
-    const gamingHours = Math.max(0, Number((2.2 - progressFactor * 2.2).toFixed(1)));
-    const studyHours = Number((1.2 + progressFactor * 2.8).toFixed(1));
-    const workHours = Number((4.5 + progressFactor * 1.5).toFixed(1));
-    const sleepHours = Number((5.2 + progressFactor * 2.6).toFixed(1));
-    const exerciseMinutes = Math.min(45, Math.round(10 + progressFactor * 30));
-    const meditationMinutes = Math.min(20, Math.round(progressFactor * 20));
-    const waterIntakeLiters = Number((1.2 + progressFactor * 1.6).toFixed(1));
-    const mood = Math.min(5, Math.max(1, Math.round(2 + progressFactor * 3)));
+    const daysAgo = i; // i=0 is today (daysAgo: 0), i=29 is 29 days ago
+    const progressFactor = (29 - i) / 29; // 1 at today (i=0), 0 at 29 days ago (i=29)
+    const screenTimeHours = Number((4.1 + (1 - progressFactor) * 4.7).toFixed(1));
+    const socialMediaHours = Number((0.6 + (1 - progressFactor) * 3.9).toFixed(1));
+    const gamingHours = Number(((1 - progressFactor) * 2.2).toFixed(1));
+    const studyHours = Number((3.8 - (1 - progressFactor) * 2.6).toFixed(1));
+    const workHours = Number((6.0 - (1 - progressFactor) * 1.5).toFixed(1));
+    const sleepHours = Number((7.8 - (1 - progressFactor) * 2.6).toFixed(1));
+    const exerciseMinutes = Math.round(35 - (1 - progressFactor) * 25);
+    const meditationMinutes = Math.round(15 - (1 - progressFactor) * 15);
+    const waterIntakeLiters = Number((2.6 - (1 - progressFactor) * 1.4).toFixed(1));
+    const mood = Math.round(5 - (1 - progressFactor) * 3);
     
     let notes = '';
-    if (i === 0) notes = 'Starting out feeling overwhelmed by constant phone notifications and late night screen fatigue.';
-    else if (i === 5) notes = 'Placed phone in another room during dinner. First small step in building physical friction.';
-    else if (i === 10) notes = 'Installed grayscale mode on smartphone. Surprising how unappealing social feeds look in monochrome.';
-    else if (i === 15) notes = 'Hit 15-day halfway milestone! Brain fog is almost entirely gone. Urge to check notifications is much lower.';
-    else if (i === 20) notes = '20-day mark passed! Neuroplastic adaptation is noticeable. Impulse to open apps is effectively silenced.';
-    else if (i === 25) notes = 'Digital detox Sunday! Spent afternoon outdoors. Calm emotional baseline, zero anxiety.';
-    else if (i === 29) notes = 'Today has been exceptionally productive. Morning sunlight within 15 min of waking, steady dopamine reserve.';
-    else notes = `Day ${i + 1} of digital well-being optimization. Focus and cognitive clarity improving steadily.`;
+    if (daysAgo === 0) notes = 'Today has been exceptionally productive. Morning sunlight within 15 min of waking, steady dopamine reserve.';
+    else if (daysAgo === 5) notes = 'Digital detox Sunday! Spent afternoon outdoors. Calm emotional baseline, zero anxiety.';
+    else if (daysAgo === 10) notes = '20-day mark passed! Neuroplastic adaptation is noticeable. Impulse to open apps is effectively silenced.';
+    else if (daysAgo === 15) notes = 'Hit 15-day halfway milestone! Brain fog is almost entirely gone. Urge to check notifications is much lower.';
+    else if (daysAgo === 20) notes = 'Installed grayscale mode on smartphone. Surprising how unappealing social feeds look in monochrome.';
+    else if (daysAgo === 25) notes = 'Placed phone in another room during dinner. First small step in building physical friction.';
+    else if (daysAgo === 29) notes = 'Starting out feeling overwhelmed by constant phone notifications and late night screen fatigue.';
+    else notes = `Day ${30 - daysAgo} of digital well-being optimization. Focus and cognitive clarity improving steadily.`;
 
     return {
       daysAgo,
