@@ -342,19 +342,18 @@ const localStore = {
   },
   getEntries(userId: string): DailyEntry[] {
     if (typeof window === 'undefined') return [];
+    if (userId === 'usr_alex') {
+      const seeded = generateSeedEntries(userId);
+      localStorage.setItem(`${STORAGE_ENTRIES_KEY}_${userId}`, JSON.stringify(seeded));
+      return seeded;
+    }
     const raw = localStorage.getItem(`${STORAGE_ENTRIES_KEY}_${userId}`);
     if (raw) {
       try {
-        const parsed = JSON.parse(raw);
-        if (userId === 'usr_alex' && parsed.length < 30) {
-          const seeded = generateSeedEntries(userId);
-          localStorage.setItem(`${STORAGE_ENTRIES_KEY}_${userId}`, JSON.stringify(seeded));
-          return seeded;
-        }
-        return parsed;
+        return JSON.parse(raw);
       } catch {}
     }
-    const seeded = userId === 'usr_alex' ? generateSeedEntries(userId) : generateInitialDay1Entry(userId);
+    const seeded = generateInitialDay1Entry(userId);
     localStorage.setItem(`${STORAGE_ENTRIES_KEY}_${userId}`, JSON.stringify(seeded));
     return seeded;
   },
