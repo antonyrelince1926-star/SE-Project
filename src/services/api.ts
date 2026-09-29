@@ -402,20 +402,17 @@ const localStore = {
   getGoals(userId: string): Goal[] {
     const raw = localStorage.getItem(`${STORAGE_GOALS_KEY}_${userId}`);
     const isAlex = userId === 'usr_alex';
-    const currentUser = this.getUser();
-    const isNewUser = !isAlex && ((currentUser?.streak ?? 1) <= 1 || this.getEntries(userId).length <= 1);
 
     if (raw) {
       try {
         let parsed = JSON.parse(raw);
-        if (isNewUser) {
-          parsed = parsed.map((g: Goal) => ({ ...g, streak: Math.min(g.streak, 1) }));
+        if (!isAlex) {
+          parsed = parsed.map((g: Goal) => ({ ...g, streak: 1 }));
           localStorage.setItem(`${STORAGE_GOALS_KEY}_${userId}`, JSON.stringify(parsed));
         }
         return parsed;
       } catch {}
     }
-    const goalStreak = isAlex ? 30 : 1;
     const defaultGoals: Goal[] = [
       {
         id: `goal_1`,
@@ -825,6 +822,10 @@ export const api = {
   async register(name: string, email: string, password?: string): Promise<{ user: User; token: string }> {
     authStorage.clearExplicitLogout();
     const cleanEmail = (email || '').trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      throw new Error('Please enter a valid email address.');
+    }
 
     const res = await safeFetchJson<{ user: User; token: string }>('/api/auth/register', {
       method: 'POST',

@@ -27,13 +27,15 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ entries, setEntries })
   const [selectedRisk, setSelectedRisk] = useState<string>('all');
   const [inspectEntry, setInspectEntry] = useState<DailyEntry | null>(null);
 
-  const filtered = entries.filter((e) => {
-    const matchesSearch =
-      e.date.includes(searchTerm) ||
-      (e.notes && e.notes.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesRisk = selectedRisk === 'all' || e.scores.riskLevel === selectedRisk;
-    return matchesSearch && matchesRisk;
-  });
+  const filtered = entries
+    .filter((e) => {
+      const matchesSearch =
+        e.date.includes(searchTerm) ||
+        (e.notes && e.notes.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesRisk = selectedRisk === 'all' || e.scores.riskLevel === selectedRisk;
+      return matchesSearch && matchesRisk;
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const handleExportCsv = () => {
     if (entries.length === 0) {
